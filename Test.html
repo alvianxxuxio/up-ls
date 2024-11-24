@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Short URL Generator with Login</title>
+  <style>
+
+
+    /* Reset CSS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f7f8fa;
+  display: flex;
+  justify-content:  center !important;
+  align-items: center !important;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  align-content: center;
+}
+
+.container {
+  text-align: center;
+  background: #ffffff;
+  height: 100vh;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  position: relative;
+}
+
+h1 {
+  font-size: 1.8em;
+  color: #333;
+  margin-bottom: 30px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  margin: 2px;
+  outline: none;
+  animation: fadeInDown 1s;
+}
+
+input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+}
+
+button {
+  padding: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  margin:2px;
+  animation: fadeInUp 1s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#result, #error-message {
+  margin-top: 30px;
+  font-size: 16px;
+}
+
+.hidden {
+  display: none;
+}
+
+#error-message {
+  color: red;
+  font-size: 14px;
+  animation: fadeInDown 2s;
+}
+
+#history {
+  margin-top: 30px;
+  text-align: left;
+  height: 330px;
+  max-height: 100vh;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  background: #f9f9f9;
+  animation: fadeInUp 2s;
+}
+
+#history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#history li {
+  padding: 12px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+#history li:last-child {
+  border-bottom: none;
+}
+
+#history a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+#history a:hover {
+  text-decoration: underline;
+}
+
+#history-list {
+  width: 100%;
+}
+
+.jks {
+  padding: 8px;
+  background-color: #007bff;
+  border-radius: 18px;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 9999999;
+}
+
+.modal.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  max-width: 100%;
+  width: 90%;
+  text-align: center;
+  z-index: 9999;
+  animation: fadeInUp 1s;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+}
+
+.modal-close:hover {
+  color: red;
+}
+/* Modal Button Styles */
+.modal-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 13px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  margin: 2px 0;
+  transition: background-color 0.3s ease;
+  animation: fadeInDown 1s;
+}
+
+.modal-btn:hover {
+  background-color: #0056b3;
+}
+
+.modal-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+  
+  
+
+    .form-container {
+      width: 100%;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .form-container input, 
+    .form-container button {
+      margin-bottom: 10px;
+      animation: fadeInUp 1s;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .error {
+      color: red;
+      font-size: 14px;
+      animation: fadeInDown 2s;
+    }
+    .navbar {
+      animation: fadeInDown 1s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border-bottom-left-radius: 13px;
+      border-bottom-right-radius: 13px;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar .left {
+      font-size: 18px;
+    }
+
+    .navbar .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .hamburger div {
+      width: 30px;
+      height: 4px;
+      background-color: white;
+    }
+
+    .hamburger.active + .menu {
+      display: block;
+    }
+
+    .menu {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background-color: #007bff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .menu a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive Design */
+
+      .navbar .left {
+        display: none;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+      .copy-btn {
+        background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 13px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  margin: 2px 0;
+  transition: background-color 0.3s ease;
+      }
+      #domain-list {
+      padding: 2px;
+  list-style: none;
+  padding: 0;
+}
+
+#domain-list li {
+  margin:2px;
+  padding: 10px;
+  background-color: #e9e9e9;
+  cursor: pointer;
+  border-radius: 13px;
+  transition: background-color 0.3s ease;
+}
+
+#domain-list li:hover {
+  background-color: #f1f1f1;
+  border: 2px solid #007bff;
+  animation: fadeIn 1s;
+}
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="auth-section">
+      <h1 id="auth-title">Login</h1>
+      <div class="form-container">
+        <!-- Form Login -->
+        <form id="login-form">
+          <input type="email" id="login-email" placeholder="Email" required>
+          <input type="password" id="login-password" placeholder="Password" required>
+          <button type="submit">Login</button>
+          <p>Don't have an account? <a href="#" id="switch-to-register">Register</a></p>
+        </form>
+
+        <!-- Form Register -->
+        <form id="register-form" class="hidden">
+          <input type="text" id="register-username" placeholder="Username" required>
+          <input type="email" id="register-email" placeholder="Email" required>
+          <input type="password" id="register-password" placeholder="Password" required>
+          <input type="password" id="register-confirm-password" placeholder="Confirm Password" required>
+          <button type="submit">Register</button>
+          <p>Already have an account? <a href="#" id="switch-to-login">Login</a></p>
+        </form>
+      </div>
+      <p id="auth-error" class="error"></p>
+    </div>
+
+    <!-- Bagian aplikasi utama -->
+    <div id="app-section" class="hidden">
+            <div class="navbar">
+        <div class="right"><h2>SHORT URL</h2></div>
+        <div class="right">
+        </div>
+        <div class="hamburger" id="hamburger">
+<button id="logout-button">Logout</button>
+        </div>
+      </div>
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="modal hidden">
+      <div class="modal-content">
+        <p id="modal-output"></p>
+        <button id="visit-link" class="modal-btn">Visit Link</button>
+        <button id="copy-link" class="modal-btn">Copy Link</button>
+        <button id="modal-close" class="modal-btn">Close</button>
+      </div>
+    </div>
+
+
+    <br><br><br>
+       <h2><small>Welcome, <span id="user-name"></span>!</small></h2> 
+  <button id="open-domain-modal" class="modal-btn">Select Domain</button>
+<p id="selected-domain" style='display: flex; justify-content: space-between;padding:4px;'><span id="xc" style=''>Default Domain :</span><span id="current-domain">l.ltsstudio.us.kg</span></p>
+
+<!-- Modal untuk domain -->
+<div id="domain-modal" class="modal hidden">
+  <div class="modal-content">
+    <h3>Select a Domain</h3><br>
+    <ul id="domain-list">
+      <li data-domain="l.ltsstudio.us.kg">l.ltsstudio.us.kg</li>
+      <li data-domain="go.ltsstudio.xyz">go.ltsstudio.xyz</li>
+      <li data-domain="travel.ltsstudio.xyz">travel.ltsstudio.xyz</li>
+      <li data-domain="love.world.my-style.in">love.world.my-style.in</li>
+      <li data-domain="m.life.synergize.co">m.life.synergize.co</li>
+      <li data-domain="learn.ltsstudio.us.kg">learn.ltsstudio.us.kg</li>
+      <li data-domain="mc-news.us.kg">mc-news.us.kg</li>
+      <li data-domain="go.charm.ct.ws">go.charm.ct.ws</li>
+      <li data-domain="m.ls.talk4fun.net">m.ls.talk4fun.net</li>
+      <li data-domain="i.site.likesyou.org">i.site.likesyou.org</li>
+    </ul><br>
+    <button id="close-domain-modal" class="modal-btn">Close</button>
+  </div>
+</div>
+
+    <input type="text" id="input" placeholder="Enter URL">
+    <input type="text" id="slug" class="hidden" placeholder="Enter Custom Slug">
+    <button id="custom-slug-button">Use Custom Slug</button>
+    <button id="shorten">Shorten URL</button>
+    <p id="output"></p>
+    
+    <div id="history">
+      <h2>History</h2>
+      <div class="hstroy">
+        <ul id="history-list"></ul>
+      </div>
+    </div>
+  </div>
+    </div>
+  
+<script>
+  const domainModal = document.getElementById("domain-modal");
+const openDomainModal = document.getElementById("open-domain-modal");
+const closeDomainModal = document.getElementById("close-domain-modal");
+const domainList = document.getElementById("domain-list");
+const currentDomain = document.getElementById("current-domain");
+const cc = document.getElementById("xc");
+
+// Buka modal
+openDomainModal.addEventListener("click", () => {
+  domainModal.classList.remove("hidden");
+  domainModal.classList.add("show");
+});
+
+// Tutup modal
+closeDomainModal.addEventListener("click", () => {
+  domainModal.classList.remove("show");
+  domainModal.classList.add("hidden");
+});
+
+// Pilih domain dari modal
+domainList.addEventListener("click", (e) => {
+  if (e.target.tagName === "LI") {
+    const selectedDomain = e.target.getAttribute("data-domain");
+    currentDomain.textContent = selectedDomain;
+    cc.textContent = "Selected Domain :";
+    domainModal.classList.remove("show");
+    domainModal.classList.add("hidden");
+  }
+});
+</script>
+  <script>
+    // Referensi elemen DOM
+    const authSection = document.getElementById("auth-section");
+    const appSection = document.getElementById("app-section");
+    const authError = document.getElementById("auth-error");
+
+    // Login form
+    const loginForm = document.getElementById("login-form");
+    const loginEmail = document.getElementById("login-email");
+    const loginPassword = document.getElementById("login-password");
+
+    // Register form
+    const registerForm = document.getElementById("register-form");
+    const registerUsername = document.getElementById("register-username");
+    const registerEmail = document.getElementById("register-email");
+    const registerPassword = document.getElementById("register-password");
+    const registerConfirmPassword = document.getElementById("register-confirm-password");
+    const profilePicture = document.getElementById("profile-picture");
+
+    // Navigation links
+    const switchToRegister = document.getElementById("switch-to-register");
+    const switchToLogin = document.getElementById("switch-to-login");
+
+    // Logout button
+    const logoutButton = document.getElementById("logout-button");
+
+    // Nama pengguna yang sedang login
+    const userNameDisplay = document.getElementById("user-name");
+
+    // Navigasi antara login dan register
+    switchToRegister.addEventListener("click", () => {
+      loginForm.classList.add("hidden");
+      registerForm.classList.remove("hidden");
+      authError.textContent = "";
+    });
+
+    switchToLogin.addEventListener("click", () => {
+      registerForm.classList.add("hidden");
+      loginForm.classList.remove("hidden");
+      authError.textContent = "";
+    });
+
+    // Fungsi register
+    registerForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const username = registerUsername.value.trim();
+      const email = registerEmail.value.trim();
+      const password = registerPassword.value.trim();
+      const confirmPassword = registerConfirmPassword.value.trim();
+
+      if (password !== confirmPassword) {
+        authError.textContent = "Passwords do not match!";
+        return;
+      }
+
+      // Simpan data pengguna ke localStorage
+      const user = { username, email, password };
+      localStorage.setItem(email, JSON.stringify(user));
+      alert("Registration successful!");
+
+      // Beralih ke login
+      registerForm.reset();
+      switchToLogin.click();
+    });
+
+// Fungsi login
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value.trim();
+
+  const user = JSON.parse(localStorage.getItem(email));
+  if (user && user.password === password) {
+    // Login berhasil
+    localStorage.setItem("loggedInUser", JSON.stringify(user)); // Simpan pengguna yang login
+    appSection.classList.remove("hidden");
+    authSection.classList.add("hidden");
+    userNameDisplay.textContent = user.username;
+    loginForm.reset();
+  } else {
+    authError.textContent = "Invalid email or password!";
+  }
+});
+
+// Fungsi logout
+logoutButton.addEventListener("click", () => {
+  localStorage.removeItem("loggedInUser"); // Hapus data login dari localStorage
+  appSection.classList.add("hidden");
+  authSection.classList.remove("hidden");
+  loginForm.reset();
+  authError.textContent = "";
+});
+
+// Periksa status login saat halaman dimuat
+document.addEventListener("DOMContentLoaded", () => {
+  const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+  if (loggedInUser) {
+    appSection.classList.remove("hidden");
+    authSection.classList.add("hidden");
+    userNameDisplay.textContent = loggedInUser.username;
+  }
+});
+    document.getElementById("custom-slug-button").addEventListener("click", function () {
+      const slugInput = document.getElementById("slug");
+      slugInput.classList.toggle("hidden");
+    });
+
+    // Generate teks acak
+    function generateRandomSlug() {
+      const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      return Array.from({ length: 6 }, () =>
+        characters.charAt(Math.floor(Math.random() * characters.length))
+      ).join("") + Date.now().toString().slice(-4);
+    }
+
+   function formatDate(date) {
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  }
+
+  // Muat riwayat dari localStorage
+ function loadHistory() {
+    const history = JSON.parse(localStorage.getItem("urlHistory")) || [];
+    const historyList = document.getElementById("history-list");
+    historyList.innerHTML = ""; // Bersihkan riwayat sebelumnya
+
+    // Tambahkan elemen riwayat
+    history.forEach(({ shortURL, originalURL, createdAt }) => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+            <strong>Link:</strong><br>
+            <a href="${shortURL}" target="_blank">${shortURL}</a>
+            <button class="copy-btn" data-url="${shortURL}">Copy</button>
+            <br><small><span>${originalURL}</span></small>
+            <br><small><strong>Created:</strong> ${createdAt}</small>
+        `;
+
+        historyList.appendChild(li);
+    });
+
+    // Tambahkan event listener untuk semua tombol "Copy" setelah elemen dimuat
+    historyList.querySelectorAll('.copy-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            const shortURL = event.target.getAttribute('data-url');
+            navigator.clipboard.writeText(shortURL)
+                .then(() => {
+                    alert('Link copied to clipboard!');
+                })
+                .catch((err) => {
+                    console.error('Error copying text: ', err);
+                });
+        });
+    });
+}
+  // Simpan riwayat ke localStorage
+  function saveToHistory(shortURL, originalURL) {
+    const history = JSON.parse(localStorage.getItem("urlHistory")) || [];
+    const createdAt = formatDate(new Date());
+    history.unshift({ shortURL, originalURL, createdAt }); // Tambahkan elemen createdAt
+    localStorage.setItem("urlHistory", JSON.stringify(history));
+  }
+
+  document.getElementById("shorten").addEventListener("click", function () {
+    const link = document.getElementById("input").value.trim();
+    const slugInput = document.getElementById("slug").value.trim();
+    const output = document.getElementById("output");
+    const domainSelector = document.getElementById("domain-selector");
+    const selectedDomain = currentDomain.textContent; // Ambil domain yang dipilih
+    output.style.color = "black";
+    output.textContent = `Loading...`;
+
+    // Validasi URL harus diawali dengan http:// atau https://
+    const validURLRegex = /^(https?:\/\/)/;
+    if (!link || !validURLRegex.test(link)) {
+      output.textContent = "Please enter a valid URL starting with http:// or https://.";
+      output.style.color = "red";
+      return;
+    }
+
+    const slug = slugInput || generateRandomSlug();
+
+    const data = {
+      domain: selectedDomain, // Gunakan domain yang dipilih
+      originalURL: link,
+      allowDuplicates: false,
+      path: slug,
+    };
+
+    let apiKey;
+    switch (selectedDomain) {
+      case "go.ltsstudio.xyz":
+        apiKey = "pk_mHL8KHaqJnIqnGHp";
+        break;
+      case "travel.ltsstudio.xyz":
+        apiKey = "pk_TKa0ZyQT0HoQ9aIQ";
+        break;
+      case "love.world.my-style.in":
+        apiKey = "pk_3MFoZzhiSWBrkzFv";
+        break;
+      case "m.life.synergize.co":
+        apiKey = "pk_usBweKlq5zdRFz0D";
+        break;
+      case "learn.ltsstudio.us.kg":
+        apiKey = "pk_wuJqKTwTGcyiP0hA";
+        break;
+      case "mc-news.us.kg":
+        apiKey = "pk_4tpNjOaI1Z2GF1Cq";
+        break;
+      case "go.charm.ct.ws":
+        apiKey = "pk_wVKNJgrsFkwy8zcV";
+        break;
+      case "m.ls.talk4fun.net":
+        apiKey = "pk_x2XeG5TAzJzmpLR3";
+        break;
+      case "i.site.likesyou.org":
+        apiKey = "pk_Lfsh4HS7t5shW8eZ";
+        break;
+      default:
+        apiKey = "pk_tYWYb6Yu0fBEphWu"; // Default API key for link.ltsstudio.xyz
+    }
+
+    fetch("https://api.short.io/links/public", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: apiKey, // Use the selected API key here
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+.then((data) => {
+  output.textContent = "";
+
+  // Tampilkan modal dengan hasil URL pendek
+  const modalOutput = document.getElementById("modal-output");
+  output.innerHTML = `
+  Shortened URL: 
+  <a href="${data.shortURL}" target="_blank">${data.shortURL}</a>
+  <button class="copy-btns" data-url="${data.shortURL}">Copy Link</button>
+  <br>
+`;
+output.style.color = "green";
+
+document.querySelector('.copy-btns').addEventListener('click', (event) => {
+    const shortURL = event.target.getAttribute('data-url');
+    navigator.clipboard.writeText(shortURL)
+        .then(() => {
+            alert('Link copied to clipboard!');
+        })
+        .catch((err) => {
+            console.error('Error copying text: ', err);
+        });
+});
+
+  const modal = document.getElementById("custom-modal");
+  const visitLinkButton = document.getElementById("visit-link");
+  const copyLinkButton = document.getElementById("copy-link");
+
+  // Menambahkan fungsi pada tombol modal
+  visitLinkButton.disabled = false;
+  copyLinkButton.disabled = false;
+
+  visitLinkButton.onclick = function () {
+    window.open(data.shortURL, "_blank");
+  };
+
+  copyLinkButton.onclick = function () {
+    navigator.clipboard.writeText(data.shortURL).then(
+      function () {
+        alert("Link copied to clipboard!");
+      },
+      function () {
+        alert("Failed to copy the link.");
+      }
+    );
+  };
+
+  // Ensure modal is visible
+  modal.classList.add("show");
+
+  // Simpan riwayat
+  saveToHistory(data.shortURL, link);
+  loadHistory(); // Muat riwayat terbaru
+})
+      .catch((error) => {
+        const modalOutput = document.getElementById("modal-output");
+        modalOutput.textContent = `Error: ${error.message}`;
+
+        const modal = document.getElementById("custom-modal");
+        const visitLinkButton = document.getElementById("visit-link");
+        const copyLinkButton = document.getElementById("copy-link");
+
+        visitLinkButton.disabled = true;
+        copyLinkButton.disabled = true;
+
+        modal.classList.add("show");
+      });
+  });
+
+  document.getElementById("modal-close").addEventListener("click", function () {
+    const modal = document.getElementById("custom-modal");
+    modal.classList.remove("show");
+  });
+
+  // Muat riwayat saat halaman dimuat
+  loadHistory();
+  </script>
+  <script>
+    function copy() {
+  // Menyalin URL ke clipboard
+  navigator.clipboard.writeText(data.shortURL).then(() => {
+    alert('Short URL copied to clipboard!');
+  }).catch((error) => {
+    console.error('Gagal menyalin teks:', error);
+    alert('Gagal menyalin teks.');
+  });
+}
+const copyLinkButton = document.getElementById('copy-link');
+copyLinkButton.addEventListener('click', copy);
+  </script>
+</body>
+</html>
